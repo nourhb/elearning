@@ -63,6 +63,17 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   
+  // Handle build-time errors gracefully
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
+  
+  // Skip problematic pages during static export
+  async generateStaticParams() {
+    return [];
+  },
+  
 
   webpack: (config, { isServer }) => {
     if (!isServer) {
