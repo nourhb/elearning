@@ -1,5 +1,6 @@
 
 import type {NextConfig} from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
   // Static export configuration
@@ -97,6 +98,16 @@ const nextConfig: NextConfig = {
         punycode: false,
       };
     }
+    
+    // Replace Firebase modules with mocks during build
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'firebase-admin': path.resolve(__dirname, 'firebase-mock.js'),
+      'firebase/app': path.resolve(__dirname, 'firebase-mock.js'),
+      'firebase/auth': path.resolve(__dirname, 'firebase-mock.js'),
+      'firebase/firestore': path.resolve(__dirname, 'firebase-mock.js'),
+      'firebase/storage': path.resolve(__dirname, 'firebase-mock.js'),
+    };
     
     // Ignore specific modules that cause issues
     config.externals = config.externals || [];
