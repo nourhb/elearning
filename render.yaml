@@ -3,7 +3,7 @@ services:
     name: dm0-elearning
     env: node
     buildCommand: npm install && npm run build
-    startCommand: npm start
+    startCommand: npx serve@latest out -p $PORT
     envVars:
       - key: NODE_ENV
         value: production
