@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Firebase and service account files
+service-account.json
+firebase-debug.log
+firebase-debug.*.log
+
+# Sensitive configuration files
+*.key
+*.pem
+*.p12
