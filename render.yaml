@@ -3,10 +3,12 @@ services:
     name: dm0-elearning
     env: node
     buildCommand: npm install && npm run build
-    startCommand: npx serve@latest out -p 10000
+    startCommand: node server.js
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 10000
       - key: NEXT_PUBLIC_FIREBASE_API_KEY
         sync: false
       - key: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
