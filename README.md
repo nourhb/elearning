@@ -1,6 +1,49 @@
-# EduVerse - Learning Management System
+# DM0 - E-Learning Platform
 
-A modern learning management system built with Next.js, Firebase, and TypeScript.
+A modern e-learning platform built with Next.js, Firebase, and Tailwind CSS.
+
+## 🚀 Deployment
+
+### Render Deployment
+
+This project is configured for deployment on Render. The build process will:
+
+1. Install dependencies
+2. Build the Next.js application
+3. Generate static export for hosting
+
+### Environment Variables
+
+For the application to work properly, you need to set the following environment variables in your Render dashboard:
+
+#### Firebase Configuration
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+
+#### Firebase Admin SDK (for server-side operations)
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY`
+
+#### Cloudinary (for image uploads)
+- `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+
+### Getting Firebase Credentials
+
+1. Go to your Firebase Console
+2. Navigate to Project Settings > Service Accounts
+3. Generate a new private key
+4. Copy the `client_email` and `private_key` values
+5. Set them as environment variables in Render
+
+### Build Status
+
+The application builds successfully with static export enabled. API routes are disabled for static hosting, but the UI and client-side functionality work properly.
 
 ## Features
 

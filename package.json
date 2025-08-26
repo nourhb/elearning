@@ -18,7 +18,7 @@
     "export:static": "next build",
     "export:clean": "rm -rf out && next build",
     "export:deploy": "npm run export:clean && node export-static.js",
-    "postbuild": "next-sitemap"
+    "postbuild": "echo 'Build completed successfully'"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

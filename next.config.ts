@@ -65,7 +65,7 @@ const nextConfig: NextConfig = {
   
   // Disable server actions for static export
   experimental: {
-    serverActions: false,
+    // serverActions is deprecated in Next.js 15
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {
