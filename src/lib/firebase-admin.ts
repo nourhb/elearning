@@ -120,14 +120,25 @@ export function initAdmin() {
              .replace(/\s*-----END PRIVATE KEY-----/g, '\n-----END PRIVATE KEY-----\n');
         return k;
     };
-    serviceAccount.privateKey = normalizePem(serviceAccount.privateKey as string);
+    
+    // Additional normalization for environment variable private keys
+    if (serviceAccount.privateKey) {
+        serviceAccount.privateKey = normalizePem(serviceAccount.privateKey as string);
+        // Handle the specific case where newlines are escaped as literal \n
+        if (serviceAccount.privateKey.includes('\\n')) {
+            serviceAccount.privateKey = serviceAccount.privateKey.replace(/\\n/g, '\n');
+        }
+    }
 
     try {
+        console.log('Initializing Firebase Admin SDK with project:', serviceAccount.projectId);
         app = initializeApp({
             credential: cert(serviceAccount),
             storageBucket: `${serviceAccount.projectId}.appspot.com`,
         });
+        console.log('Firebase Admin SDK initialized successfully');
     } catch (error: any) {
+        console.error('Firebase Admin SDK initialization failed:', error);
         throw new Error(`Failed to initialize Firebase Admin SDK. Error: ${error.message}`);
     }
 }

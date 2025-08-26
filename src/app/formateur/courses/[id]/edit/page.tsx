@@ -35,12 +35,14 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ImageUpload } from '@/components/dashboard/image-upload';
+import { CloudinaryImageUpload } from '@/components/dashboard/cloudinary-image-upload';
 
 type FormData = {
   title: string;
   description: string;
   imageUrl: string;
+  category: string;
+  level: string;
   modules: {
     id: string;
     title: string;
@@ -107,6 +109,8 @@ function EditCourseForm() {
                 title: courseData.title,
                 description: courseData.description,
                 imageUrl: courseData.imageUrl,
+                category: courseData.category || 'programming',
+                level: courseData.level || 'beginner',
                 modules: courseData.modules.map(m => ({
                     id: m.id,
                     title: m.title,
@@ -389,6 +393,20 @@ function EditCourseForm() {
                 <input type="hidden" {...field} name="imageUrl" />
             )}
         />
+        <Controller
+            name="category"
+            control={control}
+            render={({ field }) => (
+                <input type="hidden" {...field} name="category" />
+            )}
+        />
+        <Controller
+            name="level"
+            control={control}
+            render={({ field }) => (
+                <input type="hidden" {...field} name="level" />
+            )}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
            <div className="lg:col-span-2 space-y-6">
@@ -424,6 +442,53 @@ function EditCourseForm() {
                          )}
                        />
                        {(state?.errors?.description) && <p className="text-sm text-destructive">{state?.errors?.description}</p>}
+                     </div>
+                     
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <div className="space-y-2">
+                         <Label htmlFor="category">{t('category')}</Label>
+                         <Controller
+                           name="category"
+                           control={control}
+                           render={({ field }) => (
+                             <select
+                               id="category"
+                               name="category"
+                               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                               {...field}
+                             >
+                               <option value="programming">Programming</option>
+                               <option value="design">Design</option>
+                               <option value="music">Music</option>
+                               <option value="gaming">Gaming</option>
+                               <option value="business">Business</option>
+                               <option value="lifestyle">Lifestyle</option>
+                             </select>
+                           )}
+                         />
+                         {(state?.errors?.category) && <p className="text-sm text-destructive">{state?.errors?.category}</p>}
+                       </div>
+                       
+                       <div className="space-y-2">
+                         <Label htmlFor="level">{t('level')}</Label>
+                         <Controller
+                           name="level"
+                           control={control}
+                           render={({ field }) => (
+                             <select
+                               id="level"
+                               name="level"
+                               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                               {...field}
+                             >
+                               <option value="beginner">Beginner</option>
+                               <option value="intermediate">Intermediate</option>
+                               <option value="advanced">Advanced</option>
+                             </select>
+                           )}
+                         />
+                         {(state?.errors?.level) && <p className="text-sm text-destructive">{state?.errors?.level}</p>}
+                       </div>
                      </div>
                  </CardContent>
                </Card>
@@ -487,9 +552,13 @@ function EditCourseForm() {
                         <CardDescription>{t('uploadAnImageForYourCourse')}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <ImageUpload 
+                                                <CloudinaryImageUpload
                             currentImageUrl={imageUrl}
                             onImageUrlChange={(url) => setValue('imageUrl', url, { shouldDirty: true })}
+                            label={t('courseImage')}
+                            description={t('uploadAnImageForYourCourse')}
+                            aspectRatio="video"
+                            maxSize={5}
                         />
                         {(state?.errors?.imageUrl) && <p className="mt-2 text-sm text-destructive">{state?.errors?.imageUrl}</p>}
                     </CardContent>
@@ -544,7 +613,7 @@ export default function EditCoursePage() {
     const router = useRouter();
 
     useEffect(() => {
-        if (!loading && (!user || (user.role !== 'formateur' && user.role !== 'admin'))) {
+        if (!loading && (!user || user.role !== 'formateur')) {
             router.push('/login');
         }
     }, [user, loading, router]);

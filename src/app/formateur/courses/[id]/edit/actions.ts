@@ -2,6 +2,7 @@
 'use server';
 
 import { z } from 'zod';
+import { DEFAULT_PLACEHOLDER_IMAGE } from '@/lib/constants';
 import { revalidatePath } from 'next/cache';
 import { getAdminServices } from '@/lib/firebase-admin';
 
@@ -25,7 +26,9 @@ const courseSchema = z.object({
   courseId: z.string(),
   title: z.string().min(5, { message: 'Title must be at least 5 characters.' }),
   description: z.string().min(20, { message: 'Description must be at least 20 characters.' }),
-  imageUrl: z.string().url({ message: 'Please upload an image.' }).optional().default('/Countries-page-image-placeholder-800x500.webp'),
+  imageUrl: z.string().url({ message: 'Please upload an image.' }).optional().default(DEFAULT_PLACEHOLDER_IMAGE),
+  category: z.enum(['programming', 'design', 'music', 'gaming', 'business', 'lifestyle']),
+  level: z.enum(['beginner', 'intermediate', 'advanced']),
   modules: z.array(moduleSchema).min(1, 'At least one module is required.'),
 });
 
@@ -45,6 +48,8 @@ export async function updateCourseAction(prevState: any, formData: FormData) {
       title: formData.get('title'),
       description: formData.get('description'),
       imageUrl: formData.get('imageUrl'),
+      category: formData.get('category'),
+      level: formData.get('level'),
       modules,
   };
 
@@ -66,7 +71,7 @@ export async function updateCourseAction(prevState: any, formData: FormData) {
 
   try {
     const { db } = getAdminServices();
-    const { courseId, title, description, imageUrl, modules: validatedModules } = validationResult.data;
+    const { courseId, title, description, imageUrl, category, level, modules: validatedModules } = validationResult.data;
     
     // Check for duplicate course title, excluding the current course
     const coursesRef = db.collection('courses');
@@ -83,10 +88,15 @@ export async function updateCourseAction(prevState: any, formData: FormData) {
     
     const courseRef = db.collection('courses').doc(courseId);
     
+    // Save the imageUrl (Cloudinary URLs are persistent)
+    const imageUrlToSave = imageUrl;
+    
     await courseRef.update({
         title,
         description,
-        imageUrl,
+        imageUrl: imageUrlToSave,
+        category,
+        level,
         modules: validatedModules, // Use the fully validated and structured modules data
     });
     

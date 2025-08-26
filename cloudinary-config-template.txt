@@ -1,0 +1,21 @@
+# Copy this content to your .env.local file in the root directory
+
+# Cloudinary Configuration
+# Replace these values with your actual Cloudinary credentials
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your-cloud-name
+NEXT_PUBLIC_CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your-upload-preset-name
+
+# Example (replace with your actual values):
+# NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=my-cloud-name
+# NEXT_PUBLIC_CLOUDINARY_API_KEY=123456789012345
+# CLOUDINARY_API_SECRET=abcdefghijklmnopqrstuvwxyz123456
+# NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=ml_default
+
+# Instructions:
+# 1. Create a .env.local file in your project root
+# 2. Copy the above configuration
+# 3. Replace the placeholder values with your actual Cloudinary credentials
+# 4. Save the file
+# 5. Restart your development server

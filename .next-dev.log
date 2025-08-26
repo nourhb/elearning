@@ -1,0 +1,16 @@
+
+> dm0@0.1.0 dev
+> next dev -p 3000
+
+ ⚠ Warning: Found multiple lockfiles. Selecting C:\Users\HP ELITE\package-lock.json.
+   Consider removing the lockfiles at:
+   * C:\Users\HP ELITE\OneDrive\Bureau\education\dm0\package-lock.json
+
+   ▲ Next.js 15.4.6
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.128.1:3000
+
+ ✓ Starting...
+ ✓ Ready in 7.8s
+ ○ Compiling /_not-found ...
+[?25h

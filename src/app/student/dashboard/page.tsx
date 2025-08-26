@@ -178,11 +178,11 @@ export default function StudentDashboardPage() {
     return <div className="flex h-screen items-center justify-center"><p>Loading...</p></div>;
   }
   
-  return (
+    return (
      <SidebarProvider>
         <div className="flex">
           <AppSidebar />
-          <SidebarInset className="flex-1 flex flex-col">
+          <SidebarInset className="flex-1 flex flex-col md:ml-64">
             <Header />
             <main className="flex-1 overflow-y-auto">
                 <StudentDashboardContent courses={enrolledCourses} completedCount={completedCount} achievements={achievements} />
