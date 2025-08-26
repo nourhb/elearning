@@ -9,13 +9,14 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Input} from '@/components/ui/input';
 import {Label} from '@/components/ui/label';
 import {setAuthCookie} from './actions';
-import {useRouter} from 'next/navigation';
+import {useRouter, useSearchParams} from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { services } = useAuth();
+  const searchParams = useSearchParams();
 
   const handleEmailLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -32,7 +33,8 @@ export default function LoginPage() {
       const res = await setAuthCookie(idToken);
 
       if (res?.success) {
-        router.push('/');
+        const next = searchParams.get('next');
+        router.push(next && next.startsWith('/') ? next : '/');
         router.refresh(); // Force a refresh to re-evaluate auth state
       } else {
         setError(res?.message || 'An unknown error occurred during cookie setting.');

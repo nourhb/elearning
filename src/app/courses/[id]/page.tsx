@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import confetti from 'canvas-confetti';
 import { CircularProgress } from '@/components/ui/circular-progress';
 import { updateUserProgressAction } from './actions';
+import { QuizList } from '@/components/quiz/quiz-list';
 
 
 const getVideoEmbedUrl = (lesson: Lesson): string | null => {
@@ -232,7 +233,7 @@ function CoursePageContent() {
                         )}
                      </Card>
                  </main>
-                 <aside className="lg:col-span-1 lg:order-first">
+                 <aside className="lg:col-span-1 lg:order-first space-y-6">
                      <Card>
                         <CardHeader>
                             <CardTitle>{t('courseContent')}</CardTitle>
@@ -272,6 +273,8 @@ function CoursePageContent() {
                             )}
                         </CardContent>
                      </Card>
+                     
+                     <QuizList courseId={courseId as string} />
                  </aside>
              </div>
         </div>
@@ -295,10 +298,10 @@ export default function CoursePage() {
     }
 
     return (
-        <SidebarProvider>
-            <div className="flex">
-                <AppSidebar />
-                <SidebarInset className="flex-1 flex flex-col">
+      <SidebarProvider>
+        <div className="flex">
+          <AppSidebar />
+          <SidebarInset className="flex-1 flex flex-col md:ml-64">
                     <Header />
                     <main className="flex-1 overflow-y-auto">
                         <CoursePageContent />

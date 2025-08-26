@@ -1,36 +1,128 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EduVerse - Learning Management System
+
+A modern learning management system built with Next.js, Firebase, and TypeScript.
+
+## Features
+
+- **Multi-role System**: Admin, Instructor (Formateur), and Student roles
+- **Course Management**: Create, edit, and manage courses with modules and lessons
+- **User Management**: Admin can create and manage users
+- **Progress Tracking**: Track student progress through courses
+- **Email Notifications**: Automated email notifications for various events
+- **Modern UI**: Built with Tailwind CSS and shadcn/ui components
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- Firebase project
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+### Firebase Setup
+
+1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+2. Enable Authentication, Firestore, and Storage
+3. Set up Firebase Admin SDK credentials
+
+#### Firebase Admin SDK Setup
+
+You need to set up Firebase Admin SDK credentials for server-side operations. Choose one of the following methods:
+
+**Method 1: Service Account JSON File (Recommended)**
+1. Go to Firebase Console > Project Settings > Service Accounts
+2. Click "Generate new private key"
+3. Download the JSON file
+4. Place it in the project root as `service-account.json`
+
+**Method 2: Environment Variables**
+Create a `.env.local` file in the project root with:
+```
+FIREBASE_CLIENT_EMAIL=your-service-account-email@project.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour private key here\n-----END PRIVATE KEY-----\n"
+FIREBASE_PROJECT_ID=your-project-id
+```
+
+### Database Seeding
+
+After setting up Firebase credentials, seed the database with sample courses:
+
+1. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+2. Log in as an admin user
+3. Go to the admin dashboard
+4. Click "Seed Database" to create sample courses
+
+### Running the Application
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will be available at `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## User Roles
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Admin
+- Create and manage users
+- Approve courses
+- View system statistics
+- Seed database
 
-## Learn More
+### Instructor (Formateur)
+- Create and manage courses
+- Create students
+- View course analytics
 
-To learn more about Next.js, take a look at the following resources:
+### Student
+- Enroll in courses
+- Track progress
+- Complete lessons
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Troubleshooting
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### "Failed to retrieve courses" Error
+This error occurs when:
+1. No courses exist in the database - Run the "Seed Database" action
+2. Firebase admin credentials are not configured - Set up service account credentials
+3. Firebase permissions are not set correctly - Check Firestore security rules
 
-## Deploy on Vercel
+### "Server configuration error" Error
+This indicates Firebase admin services are not properly configured. Check:
+1. Service account JSON file exists and is valid
+2. Environment variables are set correctly
+3. Firebase project ID matches your configuration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/                 # Next.js app router pages
+├── components/          # React components
+├── lib/                 # Utilities and services
+├── hooks/               # Custom React hooks
+├── ai/                  # AI flows and schemas
+└── types/               # TypeScript type definitions
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.

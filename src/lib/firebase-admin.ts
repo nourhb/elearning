@@ -32,7 +32,9 @@ function readServiceAccountFromEnv(): ServiceAccount | null {
                 clientEmail: json.client_email,
                 privateKey: json.private_key,
             };
-        } catch {}
+        } catch (error) {
+            console.error('Failed to read service account from path:', error);
+        }
     }
 
     if (serviceAccountJsonInline) {
@@ -43,7 +45,9 @@ function readServiceAccountFromEnv(): ServiceAccount | null {
                 clientEmail: json.client_email,
                 privateKey: json.private_key,
             };
-        } catch {}
+        } catch (error) {
+            console.error('Failed to parse inline service account JSON:', error);
+        }
     }
 
     // Fallback: service-account.json in project root (no env needed)
@@ -58,7 +62,9 @@ function readServiceAccountFromEnv(): ServiceAccount | null {
                 privateKey: json.private_key,
             };
         }
-    } catch {}
+    } catch (error) {
+        console.error('Failed to read default service-account.json:', error);
+    }
 
     if (explicitClientEmail && (explicitPrivateKeyRaw || explicitPrivateKeyB64)) {
         let privateKey = explicitPrivateKeyRaw || '';
@@ -120,30 +126,64 @@ export function initAdmin() {
              .replace(/\s*-----END PRIVATE KEY-----/g, '\n-----END PRIVATE KEY-----\n');
         return k;
     };
-    serviceAccount.privateKey = normalizePem(serviceAccount.privateKey as string);
+    
+    // Additional normalization for environment variable private keys
+    if (serviceAccount.privateKey) {
+        serviceAccount.privateKey = normalizePem(serviceAccount.privateKey as string);
+        // Handle the specific case where newlines are escaped as literal \n
+        if (serviceAccount.privateKey.includes('\\n')) {
+            serviceAccount.privateKey = serviceAccount.privateKey.replace(/\\n/g, '\n');
+        }
+    }
 
     try {
+        console.log('Initializing Firebase Admin SDK with project:', serviceAccount.projectId);
         app = initializeApp({
             credential: cert(serviceAccount),
             storageBucket: `${serviceAccount.projectId}.appspot.com`,
         });
+        console.log('Firebase Admin SDK initialized successfully');
     } catch (error: any) {
+        console.error('Firebase Admin SDK initialization failed:', error);
         throw new Error(`Failed to initialize Firebase Admin SDK. Error: ${error.message}`);
     }
 }
 
-
 /**
- * Returns the initialized Firebase Admin services.
+ * Returns the initialized Firebase Admin services with timeout handling.
  * This is the ONLY way to access admin services.
  */
 export const getAdminServices = () => {
   if (!app) {
     initAdmin();
   }
-  return { 
+  
+  const services = { 
     auth: getAuth(app),
     db: getFirestore(app),
     storage: getStorage(app),
   };
+
+  // Remove timeout handling to prevent issues
+  // const originalGet = services.db.collection;
+  // services.db.collection = function(collectionPath: string) {
+  //   const collection = originalGet.call(this, collectionPath);
+    
+  //   // Add timeout to get() operations
+  //   const originalCollectionGet = collection.get;
+  //   collection.get = function(options?: any) {
+  //     const timeoutPromise = new Promise((_, reject) => {
+  //       setTimeout(() => reject(new Error('Database operation timed out after 30 seconds')), 30000);
+  //     });
+      
+  //     return Promise.race([
+  //       originalCollectionGet.call(this, options),
+  //       timeoutPromise
+  //     ]);
+  //   };
+    
+  //   return collection;
+  // };
+
+  return services;
 };

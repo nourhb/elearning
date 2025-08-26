@@ -14,9 +14,26 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, RefreshCw } from 'lucide-react';
+import { Send, Loader2, RefreshCw, Trash2, MoreVertical } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 function ChatPageContent() {
   const { t } = useTranslation();
@@ -25,6 +42,8 @@ function ChatPageContent() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isDeletingMessage, setIsDeletingMessage] = useState<string | null>(null);
+  const [deleteReason, setDeleteReason] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const fetchMessages = useCallback(() => {
@@ -101,6 +120,44 @@ function ChatPageContent() {
     return name.substring(0, 2);
   };
 
+  const handleDeleteMessage = async (messageId: string, reason: string) => {
+    if (!user || user.role !== 'admin') return;
+    
+    setIsDeletingMessage(messageId);
+    try {
+      const response = await fetch(`/api/admin/messages/${messageId}/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          adminUid: user.uid,
+          reason: reason || 'Message deleted by admin',
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: 'Message Deleted',
+          description: 'The message has been deleted successfully.',
+        });
+        setDeleteReason('');
+      } else {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete message');
+      }
+    } catch (error: any) {
+      console.error('Error deleting message:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to delete message',
+      });
+    } finally {
+      setIsDeletingMessage(null);
+    }
+  };
+
 
   return (
     <div className="w-full flex-1 flex flex-col p-4 md:p-6">
@@ -129,12 +186,81 @@ function ChatPageContent() {
                       <AvatarFallback>{getInitials(msg.authorName)}</AvatarFallback>
                     </Avatar>
                  )}
-                <div className={`max-w-xs md:max-w-md lg:max-w-2xl rounded-lg p-3 ${msg.authorId === user?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                    <p className="font-semibold text-sm">{msg.authorId === user?.uid ? t('you') : msg.authorName}</p>
-                    <p className="whitespace-pre-wrap">{msg.content}</p>
-                    <p className="text-xs opacity-70 mt-1">
-                        {formatDistanceToNow(msg.createdAt, { addSuffix: true })}
-                    </p>
+                <div className={`max-w-xs md:max-w-md lg:max-w-2xl rounded-lg p-3 relative group ${msg.authorId === user?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">{msg.authorId === user?.uid ? t('you') : msg.authorName}</p>
+                        <p className={`whitespace-pre-wrap ${msg.isDeleted ? 'italic opacity-60' : ''}`}>
+                          {msg.isDeleted ? '[Message deleted by admin]' : msg.content}
+                        </p>
+                        <p className="text-xs opacity-70 mt-1">
+                            {formatDistanceToNow(msg.createdAt, { addSuffix: true })}
+                            {msg.isDeleted && msg.deletionReason && (
+                              <span className="ml-2 text-red-500">
+                                • Deleted: {msg.deletionReason}
+                              </span>
+                            )}
+                        </p>
+                      </div>
+                      
+                      {/* Admin Delete Button */}
+                      {user?.role === 'admin' && !msg.isDeleted && (
+                        <div className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Message</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this message? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <div className="px-6">
+                                <div className="text-sm font-medium mb-2">Message from: {msg.authorName}</div>
+                                <div className="text-sm text-muted-foreground bg-muted p-2 rounded mb-4">
+                                  "{msg.content}"
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-sm font-medium">Reason for deletion (optional):</label>
+                                  <Input
+                                    value={deleteReason}
+                                    onChange={(e) => setDeleteReason(e.target.value)}
+                                    placeholder="e.g., Inappropriate content, spam, etc."
+                                  />
+                                </div>
+                              </div>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel onClick={() => setDeleteReason('')}>
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteMessage(msg.id, deleteReason)}
+                                  disabled={isDeletingMessage === msg.id}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  {isDeletingMessage === msg.id ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      Deleting...
+                                    </>
+                                  ) : (
+                                    'Delete Message'
+                                  )}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      )}
+                    </div>
                 </div>
                  {msg.authorId === user?.uid && (
                     <Avatar className="h-10 w-10">
@@ -183,7 +309,7 @@ export default function ChatPage() {
        <SidebarProvider>
           <div className="flex">
             <AppSidebar />
-            <SidebarInset className="flex-1 flex flex-col">
+            <SidebarInset className="flex-1 flex flex-col md:ml-64">
               <Header />
               <main className="flex-1 flex overflow-y-hidden">
                 <ChatPageContent />

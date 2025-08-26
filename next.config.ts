@@ -2,14 +2,14 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Static export configuration
+  output: 'export',
+  trailingSlash: true,
+  poweredByHeader: false,
+  
+  // Disable image optimization for static export
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -40,8 +40,67 @@ const nextConfig: NextConfig = {
         hostname: 'eduverse-98jdv.appspot.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
       }
     ],
+  },
+  
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
+  // Disable server actions for static export
+  experimental: {
+    serverActions: false,
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Exclude Node.js modules from client-side bundle
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        net: false,
+        tls: false,
+        fs: false,
+        child_process: false,
+        'firebase-admin': false,
+        crypto: false,
+        stream: false,
+        url: false,
+        zlib: false,
+        http: false,
+        https: false,
+        assert: false,
+        os: false,
+        path: false,
+        punycode: false,
+      };
+    }
+    
+    // Ignore specific modules that cause issues
+    config.externals = config.externals || [];
+    if (!isServer) {
+      config.externals.push({
+        'firebase-admin': 'commonjs firebase-admin',
+        'agent-base': 'commonjs agent-base',
+        'https-proxy-agent': 'commonjs https-proxy-agent',
+      });
+    }
+    
+    return config;
   },
 };
 

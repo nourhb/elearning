@@ -1,16 +1,19 @@
 
-'use server';
+// 'use server'; // Disabled for static export
 
 import { z } from 'zod';
-import { createCourse } from '@/ai/flows/create-course';
-import { getAdminServices } from '@/lib/firebase-admin';
-import { revalidatePath } from 'next/cache';
+import { DEFAULT_PLACEHOLDER_IMAGE } from '@/lib/constants';
+// import { createCourse } from '@/ai/flows/create-course'; // Disabled for static export
+// import { getAdminServices } from '@/lib/firebase-admin'; // Disabled for static export
+// import { revalidatePath } from 'next/cache'; // Disabled for static export
 
 const courseSchema = z.object({
   title: z.string().min(5, { message: 'Title must be at least 5 characters.' }),
   description: z.string().min(20, { message: 'Description must be at least 20 characters.' }),
   instructorId: z.string(),
-  imageUrl: z.string().url({ message: 'Please upload an image.' }).or(z.literal('')).optional().default('/Countries-page-image-placeholder-800x500.webp'),
+  imageUrl: z.string().url({ message: 'Please upload an image.' }).or(z.literal('')).optional().default(DEFAULT_PLACEHOLDER_IMAGE),
+  category: z.enum(['programming', 'design', 'music', 'gaming', 'business', 'lifestyle']),
+  level: z.enum(['beginner', 'intermediate', 'advanced']),
   modules: z.array(z.object({
     title: z.string().min(3, 'Module title must be at least 3 characters.'),
   })).min(1, 'At least one module is required.'),
@@ -33,6 +36,8 @@ export async function createCourseAction(prevState: any, formData: FormData) {
       description: formData.get('description'),
       instructorId: formData.get('instructorId'),
       imageUrl: formData.get('imageUrl'),
+      category: formData.get('category'),
+      level: formData.get('level'),
       modules: modules
   };
 
@@ -75,25 +80,14 @@ export async function createCourseAction(prevState: any, formData: FormData) {
         lessons: [], // Start with an empty lessons array
     }));
 
-    // Create a new data object for the AI flow without the imageUrl from the Zod schema
-    const { imageUrl, ...flowInput } = validationResult.data;
-
+    // Create the course with the actual imageUrl
     const newCourseData = {
-      ...flowInput,
+      ...validationResult.data,
       modules: modulesWithLessons,
     };
 
-    // Call the original createCourse flow, which sets a default placeholder
+    // Call the createCourse flow with the actual imageUrl
     await createCourse(newCourseData);
-
-    // After creation, update the newly created document with the actual imageUrl
-    // We need to find the course we just created.
-    const newCourseSnapshot = await db.collection('courses').where('title', '==', validationResult.data.title).limit(1).get();
-    
-    if (!newCourseSnapshot.empty) {
-      const newCourseDoc = newCourseSnapshot.docs[0];
-      await newCourseDoc.ref.update({ imageUrl: finalImageUrl });
-    }
     
     revalidatePath('/formateur');
 

@@ -11,11 +11,20 @@ import {
 
 
 interface UserSignupChartProps {
-  users: UserProfile[];
+  users?: UserProfile[];
 }
 
-export function UserSignupChart({ users }: UserSignupChartProps) {
+export function UserSignupChart({ users = [] }: UserSignupChartProps) {
   const { t } = useTranslation();
+
+  // Add null check for users
+  if (!users || users.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+        No user data available
+      </div>
+    );
+  }
 
   const processData = () => {
     const now = new Date();
@@ -27,14 +36,37 @@ export function UserSignupChart({ users }: UserSignupChartProps) {
     });
 
     users.forEach(user => {
-        const signupDate = user.createdAt instanceof Date ? user.createdAt : new Date(user.createdAt);
-        const monthName = format(signupDate, 'MMM');
-        const year = signupDate.getFullYear();
-        
-        const targetMonth = monthlySignups.find(m => m.name === monthName);
+        try {
+            // Handle different date formats safely
+            let signupDate: Date;
+            if (user.createdAt instanceof Date) {
+                signupDate = user.createdAt;
+            } else if (typeof user.createdAt === 'string') {
+                signupDate = new Date(user.createdAt);
+            } else if (user.createdAt && typeof user.createdAt === 'object' && user.createdAt.toDate) {
+                // Firestore timestamp
+                signupDate = user.createdAt.toDate();
+            } else {
+                // Fallback to current date if invalid
+                signupDate = new Date();
+            }
 
-        if (targetMonth && signupDate.getFullYear() === now.getFullYear()) {
-            targetMonth.total += 1;
+            // Validate the date
+            if (isNaN(signupDate.getTime())) {
+                console.warn('Invalid date for user:', user.uid, user.createdAt);
+                return; // Skip this user
+            }
+
+            const monthName = format(signupDate, 'MMM');
+            const year = signupDate.getFullYear();
+            
+            const targetMonth = monthlySignups.find(m => m.name === monthName);
+
+            if (targetMonth && signupDate.getFullYear() === now.getFullYear()) {
+                targetMonth.total += 1;
+            }
+        } catch (error) {
+            console.warn('Error processing user signup date:', user.uid, error);
         }
     });
 

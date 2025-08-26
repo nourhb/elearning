@@ -32,13 +32,11 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [services, setServices] = useState<FirebaseServices | null>(null);
+  // Initialize Firebase services synchronously to avoid initial "Loading..." stalls
+  const [services] = useState<FirebaseServices | null>({ app, auth: clientAuth, db });
   const router = useRouter();
 
   useEffect(() => {
-    // Use the initialized services from firebase.ts
-    setServices({ app, auth: clientAuth, db });
-
     const unsubscribe = onAuthStateChanged(clientAuth, async (firebaseUser) => {
       if (firebaseUser) {
         try {

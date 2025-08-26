@@ -19,7 +19,7 @@ import { Loader2, Sparkles, PlusCircle, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { generateCourseModules } from '@/ai/flows/generate-course-modules';
 import { createCourseAction } from './actions';
-import { ImageUpload } from '@/components/dashboard/image-upload';
+import { CloudinaryImageUpload } from '@/components/dashboard/cloudinary-image-upload';
 
 
 function CreateCourseForm() {
@@ -36,11 +36,13 @@ function CreateCourseForm() {
     watch,
     setValue,
     formState: { errors },
-  } = useForm<{ title: string; description: string; imageUrl: string; modules: { title: string }[] }>({
+  } = useForm<{ title: string; description: string; imageUrl: string; category: string; level: string; modules: { title: string }[] }>({
     defaultValues: {
       title: '',
       description: '',
       imageUrl: '',
+      category: 'programming',
+      level: 'beginner',
       modules: [{ title: '' }],
     },
   });
@@ -106,13 +108,7 @@ function CreateCourseForm() {
          <h2 className="text-3xl font-bold tracking-tight">{t('createNewCourse')}</h2>
        </div>
        <form 
-        onSubmit={(event) => {
-            event.preventDefault();
-            const formData = new FormData(event.currentTarget);
-            const values = watch();
-            formData.set('modules', JSON.stringify(values.modules));
-            formAction(formData);
-        }}
+        action={formAction}
         className="space-y-6"
        >
         <input type="hidden" name="instructorId" value={user?.uid} />
@@ -121,6 +117,25 @@ function CreateCourseForm() {
             control={control}
             render={({ field }) => (
                 <input type="hidden" {...field} name="imageUrl" />
+            )}
+        />
+        <Controller
+            name="modules"
+            control={control}
+            render={({ field }) => (
+                <input 
+                    type="hidden" 
+                    name="modules" 
+                    value={JSON.stringify(field.value)}
+                    onChange={(e) => {
+                        try {
+                            const parsed = JSON.parse(e.target.value);
+                            field.onChange(parsed);
+                        } catch (error) {
+                            console.error('Error parsing modules:', error);
+                        }
+                    }}
+                />
             )}
         />
 
@@ -157,6 +172,53 @@ function CreateCourseForm() {
                      )}
                    />
                    {(errors.description?.message || state?.errors?.description) && <p className="text-sm text-destructive">{errors.description?.message || state?.errors?.description}</p>}
+                 </div>
+                 
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <div className="space-y-2">
+                     <Label htmlFor="category">{t('category')}</Label>
+                     <Controller
+                       name="category"
+                       control={control}
+                       render={({ field }) => (
+                         <select
+                           id="category"
+                           name="category"
+                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                           {...field}
+                         >
+                           <option value="programming">Programming</option>
+                           <option value="design">Design</option>
+                           <option value="music">Music</option>
+                           <option value="gaming">Gaming</option>
+                           <option value="business">Business</option>
+                           <option value="lifestyle">Lifestyle</option>
+                         </select>
+                       )}
+                     />
+                     {(errors.category?.message || state?.errors?.category) && <p className="text-sm text-destructive">{errors.category?.message || state?.errors?.category}</p>}
+                   </div>
+                   
+                   <div className="space-y-2">
+                     <Label htmlFor="level">{t('level')}</Label>
+                     <Controller
+                       name="level"
+                       control={control}
+                       render={({ field }) => (
+                         <select
+                           id="level"
+                           name="level"
+                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                           {...field}
+                         >
+                           <option value="beginner">Beginner</option>
+                           <option value="intermediate">Intermediate</option>
+                           <option value="advanced">Advanced</option>
+                         </select>
+                       )}
+                     />
+                     {(errors.level?.message || state?.errors?.level) && <p className="text-sm text-destructive">{errors.level?.message || state?.errors?.level}</p>}
+                   </div>
                  </div>
              </CardContent>
            </Card>
@@ -204,9 +266,13 @@ function CreateCourseForm() {
                         name="imageUrl"
                         control={control}
                         render={({ field }) => (
-                            <ImageUpload 
+                            <CloudinaryImageUpload 
                                 currentImageUrl={field.value}
                                 onImageUrlChange={(url) => setValue('imageUrl', url, { shouldDirty: true })}
+                                label={t('courseImage')}
+                                description={t('uploadAnImageForYourCourse')}
+                                aspectRatio="video"
+                                maxSize={5}
                             />
                         )}
                     />
@@ -237,7 +303,7 @@ export default function CreateCoursePage() {
     const router = useRouter();
 
     useEffect(() => {
-        if (!loading && (!user || (user.role !== 'formateur' && user.role !== 'admin'))) {
+        if (!loading && (!user || user.role !== 'formateur')) {
             router.push('/login');
         }
     }, [user, loading, router]);

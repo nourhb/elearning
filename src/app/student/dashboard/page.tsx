@@ -141,27 +141,15 @@ export default function StudentDashboardPage() {
         const fetchStudentData = async () => {
             setDataLoading(true);
             try {
-                const [allCourses, userProgress] = await Promise.all([
-                    getAllCourses(services.db),
-                    getProgressForUser(services.db, user.uid)
-                ]);
-
-                const progressMap = new Map(userProgress.map(p => [p.courseId, p]));
-                const coursesForStudent = allCourses.filter(course => progressMap.has(course.id));
+                // Use the real student dashboard API
+                const response = await fetch('/api/real-student-dashboard', { cache: 'no-store' });
+                if (!response.ok) throw new Error('Failed to fetch student data');
                 
-                const coursesWithProgress = coursesForStudent.map(course => ({
-                    ...course,
-                    progress: progressMap.get(course.id)?.progress || 0,
-                    completed: progressMap.get(course.id)?.completed || false,
-                }));
+                const data = await response.json();
                 
-                setEnrolledCourses(coursesWithProgress);
-
-                const completed = userProgress.filter(p => p.completed).length;
-                setCompletedCount(completed);
-                
-                const earnedAchievements = getEarnedAchievements(userProgress);
-                setAchievements(earnedAchievements);
+                setEnrolledCourses(data.enrolledCourses || []);
+                setCompletedCount(data.completedCount || 0);
+                setAchievements(data.achievements || []);
 
             } catch (error) {
                 console.error("Failed to fetch student data:", error);
@@ -178,11 +166,11 @@ export default function StudentDashboardPage() {
     return <div className="flex h-screen items-center justify-center"><p>Loading...</p></div>;
   }
   
-  return (
+    return (
      <SidebarProvider>
         <div className="flex">
           <AppSidebar />
-          <SidebarInset className="flex-1 flex flex-col">
+          <SidebarInset className="flex-1 flex flex-col md:ml-64">
             <Header />
             <main className="flex-1 overflow-y-auto">
                 <StudentDashboardContent courses={enrolledCourses} completedCount={completedCount} achievements={achievements} />

@@ -11,15 +11,24 @@ import {
 } from "@/components/ui/chart";
 
 interface EnrollmentChartProps {
-  courses: Course[];
+  courses?: Course[];
 }
 
-export function EnrollmentChart({ courses }: EnrollmentChartProps) {
+export function EnrollmentChart({ courses = [] }: EnrollmentChartProps) {
   const { t } = useTranslation();
+
+  // Add null check for courses
+  if (!courses || courses.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+        No course data available
+      </div>
+    );
+  }
 
   const chartData = courses.map(course => ({
     name: course.title.length > 20 ? `${course.title.substring(0, 20)}...` : course.title,
-    students: course.studentCount,
+    students: course.studentCount || 0,
   }));
 
   const chartConfig = {

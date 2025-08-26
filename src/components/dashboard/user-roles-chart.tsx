@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/chart";
 
 interface UserRolesChartProps {
-  users: UserProfile[];
+  users?: UserProfile[];
 }
 
 const COLORS = {
@@ -21,8 +21,17 @@ const COLORS = {
   student: 'hsl(var(--chart-3))',
 };
 
-export function UserRolesChart({ users }: UserRolesChartProps) {
+export function UserRolesChart({ users = [] }: UserRolesChartProps) {
   const { t } = useTranslation();
+  
+  // Add null check for users
+  if (!users || users.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+        No user data available
+      </div>
+    );
+  }
   
   const roleCounts = users.reduce((acc, user) => {
     acc[user.role] = (acc[user.role] || 0) + 1;

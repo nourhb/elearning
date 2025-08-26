@@ -1,7 +1,7 @@
 
-'use server';
+// 'use server'; // Disabled for static export
 
-import {cookies} from 'next/headers';
+// import {cookies} from 'next/headers'; // Disabled for static export
 
 export async function setAuthCookie(idToken: string): Promise<{ success: boolean; message?: string }> {
   try {

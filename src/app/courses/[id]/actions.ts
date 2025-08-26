@@ -1,7 +1,7 @@
 
-'use server';
+// 'use server'; // Disabled for static export
 
-import { getAdminServices } from '@/lib/firebase-admin';
+// import { getAdminServices } from '@/lib/firebase-admin'; // Disabled for static export
 import type { UserProgress } from '@/lib/types';
 import { Timestamp } from 'firebase-admin/firestore';
 

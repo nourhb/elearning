@@ -1,3 +1,6 @@
+export const dynamic = 'force-static';
+export const revalidate = false;
+
 import {NextRequest, NextResponse} from 'next/server';
 import {auth} from 'firebase-admin';
 import {initAdmin} from '@/lib/firebase-admin';

@@ -9,6 +9,9 @@
   "settings": "الإعدادات",
   "help": "مساعدة",
   "searchCourses": "ابحث عن الدورات...",
+  "browseAndEnroll": "تصفح وسجل",
+  "searchCoursesByTitle": "ابحث عن الدورات بالعنوان",
+  "tryDifferentSearchTerm": "جرب مصطلح بحث مختلف",
   "profile": "الملف الشخصي",
   "logout": "تسجيل الخروج",
   "welcomeBack": "مرحباً بعودتك",
@@ -207,6 +210,10 @@
   "userProfileHasBeenSuccessfullyUpdated": "تم تحديث ملف تعريف المستخدم بنجاح.",
   "updateFailed": "فشل التحديث",
   "hasBeenPermanentlyRemoved": "تمت إزالته بشكل دائم.",
-  "anErrorOccurredWhileDeletingTheUser": "حدث خطأ أثناء حذف المستخدم."
+  "anErrorOccurredWhileDeletingTheUser": "حدث خطأ أثناء حذف المستخدم.",
+  "courseTitle": "عنوان الدورة",
+  "courseDescription": "وصف الدورة",
+  "deleteCourse": "حذف الدورة",
+  "students": "الطلاب"
 }
 
