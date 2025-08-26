@@ -1,0 +1,4 @@
+# Render Deployment Trigger
+# This file ensures Render picks up the latest configuration
+# Last updated: 2025-08-26
+# Using Express server on port 10000
